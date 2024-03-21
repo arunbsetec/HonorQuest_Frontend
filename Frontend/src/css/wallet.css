@@ -1,0 +1,233 @@
+.header {
+ background-color:#ece3e3;
+ height: 25%;
+ width: 100%;
+}
+.fixed-header{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px
+}
+.cont{
+    margin: 10px;
+    height: 100%;
+}
+.firstRow{
+    display: flex;
+    min-width: 100%;
+    height: 300px;
+
+}
+.mint{
+    width: 50%;
+    background-color: #cfdfdf;
+    height: 180px;
+    align-items: center;
+    padding: 20px;
+}
+
+.val{
+    width: 50%;
+    height: 200px;
+}
+.vault{
+    width: 100%;
+    height: 260px;
+    background-color: #aac7c7;
+    padding: 10px;
+    /* overflow-y: auto; */
+}
+.vault > div:first-child{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 40px;
+    height: fit-content;
+    width: 100%;
+}
+.vault > div:last-child{
+    max-height:210px ;
+    overflow-y: auto;
+}
+/* .vault > div:first-child{
+    height: 260px;
+} */
+/* .vault > div:last-child{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 25px;
+} */
+.lastRow{
+    display: flex;
+    min-width: 100%;
+    height: 380px;
+}
+.lastRow > div:first-child{
+    display: block;
+    width: 50%;
+}
+.action{
+    background-color: #ecf7e8;
+    width:100% ;
+}
+.action > div:first-child{
+    height: fit-content;
+    width: 100%;
+    /* border: 1px solid black; */
+    background-color: #f0eded;
+
+}
+.action > div:last-child{
+    max-height:250px ;
+    overflow-y: auto;
+}
+.action .card{
+    height: 60px;
+    background-color: #c0e0e0;
+}
+.lock{
+    background-color: #b2f0f0;
+    width: 100%;
+    height: 240px;
+    margin-top: -125px;
+    padding-top: 3px;
+}
+.lock > div:first-child{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 3px;
+    height: fit-content;
+}
+.lock > div:last-child{
+    margin-top:2px;
+    max-height: 190px;
+    overflow-y:auto;
+}
+.stacks{
+    width: 50%;
+    background-color: #cfdfdf;
+}
+img{
+    width: 125px;
+    height: 125px;
+}
+.card{
+    margin: 5px;
+    height: 175px;
+}
+.stacks_first{
+    margin-top: 2px;
+    display: flex;
+    min-width: 100%;
+    height: 50%;
+}
+.stacks_first > div:first-child{
+    align-items: center;
+    width: 50%;
+    overflow-x: scroll;
+    background-color: #c8f7e7;
+}
+.stacks_first > div:last-child{
+    align-items: center;
+    width: 50%;
+    overflow-x: scroll;
+    background-color: rgb(162, 235, 245);
+}
+.stacks_last{
+    margin-top: 2px;
+    display: flex;
+    min-width: 100%;
+    height: 50%;
+}
+.stacks_last > div:first-child{
+    align-items: center;
+    width: 50%;
+    overflow-x: scroll;
+    background-color: #cee0e0;
+}
+.stacks_last > div:last-child{
+    align-items: center;
+    width: 50%;
+    overflow-x: scroll;
+    background-color: #faebd7;
+}
+.stacks button{
+    background-color: #0d8181;
+    margin-left: 10px;
+    border-radius: 7px;
+    border: 1px solid;
+    height: fit-content;
+}
+
+.stacks img {
+    height: 50px;
+}
+.selected {
+    border: 2px solid rgb(155 6 121); 
+}
+.selectedVault{
+    border: 2px solid #f10800;
+}
+::-webkit-scrollbar{width:2px;}
+/* ::-webkit-scrollbar-thumb{height: 1px; background-color: #dfcbcb;} */
+.Quest .row {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .Quest .col-6 {
+    display: inline-block;
+    vertical-align: top;
+    white-space: normal;
+  }
+.reward{
+    display: flex;
+    align-items:center;
+    justify-content: space-evenly;
+    height: 40px;
+    width: 100%;
+    gap: 100px;
+}
+.reward p{
+    margin: 0px !important;
+}
+.reward button{
+    background-color: #00f3cb;
+}
+.noData{
+    /* width: 100% !important; */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: transparent !important;
+}
+.crossMint{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+.select {
+    background-color: #008758;
+    padding: 8px;
+    border-radius: 5px;
+    color: white;
+}
+.option{
+    background-color: whitesmoke;
+    color: black;
+}
+.Training .row {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .Training .col-6 {
+    display: inline-block;
+    vertical-align: top;
+    white-space: normal;
+  }

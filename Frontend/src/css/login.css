@@ -1,0 +1,19 @@
+.wallet{
+    margin: 100px;
+    /* height: 200px; */
+    padding: 100px;
+}
+.bt{
+    /* border: 1px solid black; */
+    background-color: #81e7c8;
+    font-size: 25px;
+}
+.bt:hover{
+    border: 1px solid black;
+}
+.con {
+    background-color: #dbf1ea;
+    display: flex ;
+    align-items: center;
+    justify-content: center;
+}
