@@ -6,6 +6,7 @@ import {vault} from "../lib/L1//vault"
 import {HonorQuest_l2} from "../lib/L2/honrQuest"
 import {Quest_l2} from "../lib/L2/quest"
 import { Training_l2 } from '../lib/L2/Training';
+import {Claim_l1} from '../lib/L1/claim'
 const config = require('../config')
 
 async function gen0(signer){
@@ -31,7 +32,12 @@ async function honorQuest_l1(signer){
 
 async function horn_l1(signer){
     const horn = new ethers.Contract(config.Horn,Horn,signer)
-    return horn
+    return horn;
+}
+
+async function claim_l1(signer){
+    const claim = new ethers.Contract(config.Claim,Claim_l1,signer)
+    return claim;
 }
 
 async function honorQuest_l2(signer) {
@@ -79,5 +85,6 @@ export {
     quest_l2,
     training_l2,
     checkapprove,
-    setApproval
+    setApproval,
+    claim_l1
 }

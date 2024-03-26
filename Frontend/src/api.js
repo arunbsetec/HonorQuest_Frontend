@@ -67,6 +67,19 @@ export async function gen0Signature(address,quatity){
     }
 }
 
+export async function gen1Signature(address,quatity){
+    try{
+        console.log(address,quatity,"========quantity")
+        const result = await axios.post(`http://localhost:4000/L2/gen1Signature`,{address:address,quantity:quatity})
+        console.log(result,"===========result")
+        return result.data
+    }
+    catch(error){
+        console.log(error);
+        return error;
+    }
+}
+
 export async function getQuestStack(address){
     try{
         console.log(address,"==============address");
@@ -109,6 +122,18 @@ export async function vaultUnStack(address,tokenId,type){
     try{
         const res = await axios.post(`${Activity.vaultUnstack}`,{address,tokenId,type});
         console.log(res,"======= result of the activity stack");
+        return res;
+    }
+    catch(e){
+        console.log(e,"===========error");
+        return e;
+    }
+}
+
+export async function claimReward(address,reward,type){
+    try{
+        const res = await axios.post(`${Activity.claimReward}`,{address,reward,type});
+        console.log(res,"======= result of the activity reward");
         return res;
     }
     catch(e){
@@ -161,6 +186,18 @@ export async function trainingUnstake(address,tokenId,character){
     }
     catch(err){
         console.log("error:",err)
+        return err;
+    }
+}
+
+export async function claimSignature(address){
+    try{
+        const res = await axios.post(`${l2api.claimSignature}`,{address})
+        console.log(res,"============result of the claim signature");
+        return res.data;
+    }
+    catch(err){
+        console.log("error:",err);
         return err;
     }
 }

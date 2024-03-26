@@ -18,9 +18,9 @@ import { Navbar, Nav } from 'react-bootstrap';
 import "../css/wallet.css"
 import CustomLoader from './CustomLoader';
 import Crossmint from './Crossmint';
-import { getstakedtokens, gettokenUri, gen0Signature, stake, unstake, claimQuestReward, getAllActivity, getIdActivity, vaultStack, vaultUnStack,trainingStake,trainingUnstake } from "../api"
+import { getstakedtokens, gettokenUri, gen0Signature, gen1Signature, stake, unstake, claimQuestReward, getAllActivity, getIdActivity, vaultStack, vaultUnStack,trainingStake,trainingUnstake,claimSignature,claimReward } from "../api"
 import "../config"
-import { gen0, Vault, honorQuest_l1, honorQuest_l2, quest_l2, Vault_l1, checkapprove, setApproval,horn_l1,training_l2 } from "./blockchainUtilits"
+import { gen0, Vault, honorQuest_l1, honorQuest_l2, quest_l2, Vault_l1, checkapprove, setApproval,horn_l1,training_l2,claim_l1 } from "./blockchainUtilits"
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 const config = require('../config')
@@ -93,6 +93,8 @@ const Wallet = () => {
    // Button hidding
 
    const [mint, setMint] = useState(false)
+   const [Load, setLoad] = useState(false)
+   const [Stack, setStack] = useState(false)
 
    // Reward and balacnce
 
@@ -105,6 +107,11 @@ const Wallet = () => {
    const [activity, setActivity] = useState([]);
    const [activityview, setActivityview] = useState(false)
    const [modelCharacter, setModelCharacter] = useState([])
+
+   // deposite modal
+
+   const[depositeView, setDepositeview] = useState(false)
+   const [tokenValue, setTokenValue] = useState("");
 
    // Hide crossMint button for gen1
 
@@ -611,8 +618,9 @@ const Wallet = () => {
             character = 5;
          }
          const reward = await questContract.CurrentReward(address, token, character)
+         const balance = parseFloat(ethers.formatEther(reward))
          console.log(reward, "=============reward")
-         const ic = { Token: token, character: char, inVault: true, stackIn: "quest", reward: await rewardCalculation(reward) };
+         const ic = { Token: token, character: char, inVault: true, stackIn: "quest", reward: await rewardCalculation(balance) };
          console.log(ic, "==========rewards", reward)
          questarray.push(ic);
          SetquestArray(prevArray => [...prevArray, ic]);
@@ -642,10 +650,10 @@ const Wallet = () => {
    }
 
    async function rewardCalculation(reward) {
-      const num_to_string = reward;
-      const number = Number(num_to_string)
-      const div = number / 10 ** 18
-      const fixed = div.toFixed(2)
+      // const num_to_string = reward;
+      // const number = Number(num_to_string)
+      // const div = number / 10 ** 18
+      const fixed = reward.toFixed(2)
       console.log(fixed, "===================slice of")
       return fixed;
    }
@@ -654,17 +662,23 @@ const Wallet = () => {
       const questContract = await quest_l2(user);
       console.log(questContract, "===========Quest contract", address)
       const claimedBalance = await questContract.claimedReward(address)
-      const balance = await rewardCalculation(claimedBalance)
+      console.log(claimedBalance, "==========claimed Balance")
+      const balance = parseFloat(ethers.formatEther(claimedBalance))
       console.log(balance, "==========claimed Balance")
-      setBalance(balance);
+      const calcBalance = await rewardCalculation(balance);
+      console.log(calcBalance,"================calcBalance");
+      setBalance(calcBalance);
    }
 
    async function Hornbalance(){
       const Horn = await horn_l1(user);
       const balance = await Horn.balanceof(address)
       console.log(balance,"===============balance of erc20 tokens")
-      setHornBalance(balance)
-
+      const bal = parseFloat(ethers.formatEther(balance));
+      const calcBalance = await rewardCalculation(bal);
+      console.log(calcBalance,"============calcBalance")
+      setHornBalance(calcBalance)
+      return calcBalance;
    }
 
    async function getallActivity() {
@@ -724,21 +738,29 @@ const Wallet = () => {
             Gen0Contract = new ethers.Contract(config.Gen0, Gen0, user);
             console.log(Gen0Contract);
             Gen1Contract = new ethers.Contract(config.Gen1,Gen1,user)
-            const signature = await gen0Signature(address, clicks)
-            console.log(signature, "=============sign in mint")
-            const signData = signature.message
-            console.log(signData, "===========signature data")
+            // const signature = await gen0Signature(address, clicks)
+            // console.log(signature, "=============sign in mint")
+            // const signData = signature.message
+            // console.log(signData, "===========signature data")
             // const mintCount = await Gen0Contract.minted()
             // console.log(mintCount.toString(),"===========mintcount")
             // const mintStr = mintCount.toString()
             // const count = Number(mintStr);
             // console.log(count,"==========count",typeof count)
             if(switchmint){
+               const signature = await gen0Signature(address, clicks)
+               console.log(signature, "=============sign gen0 in mint")
+               const signData = signature.message
+               console.log(signData, "===========signature data")
                console.log("gen0 called in the ")
                const minting = await Gen0Contract.mint(clicks, signData.deadline, signData.nonce, signData.v, signData.r, signData.s, { value: mintValueInWei });
                console.log(minting);
                await minting.wait();
             }else{
+               const signature = await gen1Signature(address, clicks)
+               console.log(signature, "=============sign gen1 in mint")
+               const signData = signature.message
+               console.log(signData, "===========signature data")
                console.log("gen1 called in the")
                const minting = await Gen1Contract.mint(address,clicks, signData.deadline, signData.nonce, signData.v, signData.r, signData.s);
                console.log(minting);
@@ -807,12 +829,75 @@ const Wallet = () => {
       }
    }
 
+   async function withDraw(){
+     try{
+      const Claim = await claim_l1(user);
+      const signature = await claimSignature(address)
+      console.log(signature,"==============signature")
+      let reward = Number(signature.message.reward)
+      reward = reward.toFixed(0)
+      console.log(reward,"===================reward")
+      const signData = signature.message.claimreward
+      console.log(signData, "===========signature data")
+      const Withdraw = await Claim.claim(address,reward,signData.deadline, signData.nonce, signData.v, signData.r, signData.s)
+      await Withdraw.wait();
+      const ClaimActivity = await claimReward(address,reward, 'Claim')
+      console.log(ClaimActivity, "===========vault activity")
+      getallActivity()
+      const balance = Hornbalance()
+      console.log(balance,"==============balance in witdraw")
+      const currentBalance = CurrentBalance()
+      console.log(currentBalance,"===========currentBalance")
+      Settoast(true)
+      Settoastmessage("Withdraw Sucessfull")
+   }
+     catch(err){
+      Settoast(true)
+      Settoastmessage("Withdraw Failed")
+      console.log(err, "==========error")
+     }      
+   }
+
+   async function deposittoken(amount) {
+       try {
+           const Horn = await horn_l1(user);
+           const balance = await Horn.balanceOf(address);
+           console.log(balance, "==========balance");
+           const balNum = (ethers.formatEther(balance)); // Convert balance to Ether
+           const amountToSend = ethers.parseEther(amount.toString());
+   
+           console.log(balNum, amountToSend, "=================parameters");
+   
+           if (balNum < amountToSend) {
+               Settoast(true);
+               Settoastmessage("Insufficient Balance");
+           } else {
+               console.log(address, config.Vault, amountToSend, "===============transfer");
+               const transfer = await Horn.transfer(config.Vault, amountToSend);
+               console.log(transfer, "==============transfer");
+   
+               // Assuming Hornbalance() is a function to fetch balance
+               const updatedBalance = await Hornbalance();
+               console.log(updatedBalance, "==============balance in depositToken");
+   
+               Settoast(true);
+               Settoastmessage("Deposit Successfully");
+           }
+       } catch (err) {
+           Settoast(true);
+           Settoastmessage("Deposit Failed");
+           console.log(err, "==========error");
+       }
+   }
+    
+
    async function Stake() {
       try {
          if (selectedVaultCard.length === 0) {
             Settoast(true);
-            Settoastmessage("Select Tokens to Stake in Quest");
+            Settoastmessage("Select Tokens to Stake");
          } else if (address && address !== null && address !== undefined) {
+            setStack(true)
             QuestStakeContract = quest_l2(user)
             NftContract = honorQuest_l2(user)
             honorQuest = await honorQuest_l1(user)
@@ -830,12 +915,14 @@ const Wallet = () => {
             getallActivity()
             setSelectedVaultCard([]);
             setQueststs(true)
+            setStack(false)
             Settoast(true);
             Settoastmessage("Stake Successfull")
          }
       }
       catch (error) {
          setSelectedVaultCard([]);
+         setStack(false)
          Settoast(true)
          Settoastmessage("Stack unSuccessfull")
          console.log(error, "==========")
@@ -916,6 +1003,7 @@ const Wallet = () => {
             Settoast(true);
             Settoastmessage("Select Tokens to Stake in the Vault");
          } else if (address && address !== null && address !== undefined) {
+            setLoad(true)
             honorQuest = await honorQuest_l1(user);
             vaultContract = await Vault_l1(user);
             console.log(user, "=============signer.current");
@@ -943,11 +1031,13 @@ const Wallet = () => {
                   console.log(vaultActivity, "===========vault activity")
                   getallActivity()
                   setVaultsts(true);
+                  setLoad(false)
                   Settoast(true);
                   Settoastmessage("Vault Staked Successfully");
                   setSelectedMintCard([]);
                }
             } else {
+               setLoad(true)
                console.log("else ===============");
                const arr = await Lock();
                console.log(address, arr, "============parameters");
@@ -962,11 +1052,13 @@ const Wallet = () => {
                const vaultActivity = await vaultStack(address, arr, 'Vault')
                console.log(vaultActivity, "===========vault activity")
                Settoast(true);
+               setLoad(false)
                Settoastmessage("Vault Staked Successfully");
                setSelectedMintCard([]);
             }
          }
       } catch (err) {
+         setLoad(false)
          Settoast(false);
          Settoastmessage("");
          console.log("error:", err);
@@ -981,6 +1073,7 @@ const Wallet = () => {
             Settoastmessage("Select Tokens to UnStake in the Vault");
          }
          else if (address && address !== null && address !== undefined) {
+            setLoad(true)
             honorQuest = await honorQuest_l1(user)
             vaultContract = await Vault_l1(user)
             console.log(user, "=============signer.current")
@@ -1000,7 +1093,7 @@ const Wallet = () => {
             getallActivity()
             SetstkArray([])
             setVaultsts(true);
-            setClicks(0);
+            setLoad(false)
             const ownerOf1 = await honorQuest.ownerof(3);
             console.log("ownerof", ownerOf1)
             const array = await vaultContract.getVaultTokens(address);
@@ -1012,6 +1105,7 @@ const Wallet = () => {
       }
       catch (err) {
          Settoast(false)
+         setLoad(false)
          Settoastmessage("Vault Unstaked Unsuccessfull")
          console.log("error:", err)
       }
@@ -1083,12 +1177,17 @@ const Wallet = () => {
       const Selectedstack = e.target.value 
       if(Selectedstack == "Quest"){
          Stake()
+         
       }else if(Selectedstack == "Training"){
          TrainingStack();
       }else{
          setSelectedOption(Selectedstack)
       }
 
+   }
+
+   function depView(){
+      setDepositeview(true)
    }
 
    return (
@@ -1104,10 +1203,17 @@ const Wallet = () => {
                      </Toast>
                </ToastContainer>
                <Navbar expand="lg" sticky="top" className="fixed-header">
-                  {address && (
+               {address && (
                      <Nav style={{ border: "2px solid", borderRadius: "5px" }}>
-                        <FloatingLabel controlId="HornBalance" label="Horn Balance" className="mr-2" style ={{width:'fit-content'}}>
-                           <Form.Control type="text"  style ={{width:'145px'}} placeholder="Horn Balance" readOnly value={ hornBalance + " " + "horn"}/>
+                        <FloatingLabel controlId="HornBalance" label="Horn Balance" className="mr-2" style={{ width: 'fit-content' }}>
+                           <Form.Control type="text" style={{ width: '145px' }} placeholder="Horn Balance" readOnly value={hornBalance + " " + "horn"} />
+                        </FloatingLabel>
+                     </Nav>
+                  )}
+                  {address && (
+                     <Nav style={{ borderRadius: "5px" }}>
+                        <FloatingLabel controlId="HornBalance"  className="mr-2" style ={{width:'fit-content'}}>
+                           <Button variant="info" onClick={depView}>Deposit</Button>
                         </FloatingLabel>
                      </Nav>
                   )}
@@ -1159,8 +1265,9 @@ const Wallet = () => {
                               {address && (
                                  <div style={{ paddingTop: "1%" }}>
                                     <select className='select' value={selectedOption} onChange={(e) =>{stacksection(e)}}>
-                                       <option className='option' value={""}>
-                                          Select StackIn
+                                    <Button variant="success" onClick={Mint} disabled={mint}>{mint ? "Minting" : "Mint"}</Button>
+                                       <option className='option' value={""} disabled={Stack}>
+                                          {Stack ? "Stacking" : "Select Stack"}
                                        </option>
                                        <option className='option' value={"Quest"}>
                                           Quest
@@ -1176,7 +1283,7 @@ const Wallet = () => {
                            <div>
                               {address && (
                                  <div style={{ paddingTop: "1%" }}>
-                                    <Button variant="success" onClick={VaultUnstack}>UnLock</Button>
+                                    <Button variant="success" onClick={VaultUnstack} disabled={Load}>{Load ? "UnLocking" : "UnLock"}</Button>
                                  </div>
                               )}
                            </div>
@@ -1201,7 +1308,7 @@ const Wallet = () => {
                    </div>)} 
                   <div className='reward'>
                      <p>CurrentBalance:{balance} Honr</p>
-                     <button class="btn">WITHDRAW</button>
+                     <button class="btn" onClick={withDraw}>WITHDRAW</button>
                   </div>
                </div>
 
@@ -1215,7 +1322,7 @@ const Wallet = () => {
                               <div>
                                  {address && (
                                     <div style={{ marginLeft: "50vh" }}>
-                                       <Button variant="success" onClick={Vaultstack}>Lock</Button>
+                                       <Button variant="success" onClick={Vaultstack} disabled={Load}>{Load ? "Locking" : "Lock"}</Button>
                                     </div>
                                  )}
                               </div>
@@ -1400,7 +1507,35 @@ const Wallet = () => {
 
             </Modal>
 
+            <Modal 
+               isOpen={depositeView}
+               style={{
+                  content: {  
+                     position: 'relative',
+                     inset: '100px',
+                     width: '30%',
+                     margin: 'auto',
+                     border: '3px solid #ccc',
+                     borderRadius: '5px',
+                     padding: '10px',
+                     height: '20%'
+                  }
+               }}
+               onRequestClose={() => {setDepositeview(false);setTokenValue("")}}
+            >
+               <div className='deposite'>
+                  <div class="form-floating mb-3">
+                     <input type="number" class="form-control" id="floatingInput" placeholder="Despoist Token"  value={tokenValue} onChange={(e) => { const sanitizedValue = e.target.value.replace(/\D/g, ''); setTokenValue(sanitizedValue);}} />
+                     <label for="floatingInput">Deposit Token(Integer Only)</label>
+                  </div>
+                  <div>
+                     <button className="btn depbtn" onClick={() =>{ setDepositeview(false);setTokenValue("")}}>Close</button>
+                     <button class='btn depbtn' onClick={() => {deposittoken(tokenValue)}}>Deposite Token</button>
+                  </div>
+               </div>
+            </Modal>
 
+ 
          </div>
 
       </div>

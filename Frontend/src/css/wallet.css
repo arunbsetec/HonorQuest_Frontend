@@ -187,10 +187,10 @@ img{
 .reward{
     display: flex;
     align-items:center;
-    justify-content: space-evenly;
+    justify-content: space-between;
     height: 40px;
     width: 100%;
-    gap: 100px;
+    /* gap: 100px; */
 }
 .reward p{
     margin: 0px !important;
@@ -230,4 +230,19 @@ img{
     display: inline-block;
     vertical-align: top;
     white-space: normal;
+  }
+
+  .depbtn{
+    background-color: #b2f0f0;
+    width: fit-content;
+    height: fit-content;
+    
+  }
+  .depbtn:hover{
+    border: 1px solid black;
+  }
+  .deposite > div:last-child{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
